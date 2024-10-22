@@ -248,3 +248,8 @@ clean:
 	.gdbinit \
 	$U/usys.S \
 	$(UPROGS)
+
+all:
+	make clean
+	make fs
+	make run
