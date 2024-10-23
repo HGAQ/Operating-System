@@ -36,6 +36,10 @@
 #define VIRT_OFFSET             0x3F00000000L
 
 #ifdef QEMU
+
+// QEMU test interface. Used for poweroff and on.
+#define QEMU_POWER              0x100000
+
 // qemu puts UART registers here in physical memory.
 #define UART                    0x10000000L
 #else

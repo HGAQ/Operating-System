@@ -66,7 +66,6 @@ int main(void) {
       wait((int*)0);
     }
   }
-  (*(volatile uint32 *) 0x100000)=0x5555;
   for(;;){
     wpid = wait((int *) 0);
     if(wpid == pid){
@@ -74,13 +73,12 @@ int main(void) {
       break;
     } else if(wpid < 0){
       printf("init: wait returned an error\n");
-      (*(volatile uint32 *) 0x100000)=0x5555;
       exit(1);
     } else {
       // it was a parentless process; do nothing.
     }
   }
-  (*(volatile uint32 *) 0x100000)=0x5555;
+  exit(-1);
   return 0;
 }
 

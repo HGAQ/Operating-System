@@ -21,4 +21,6 @@ static inline long __syscall0(long n){
     register long a0 __asm__("a0");
     __asm_syscall("r"(a7))
 }
+
+
 #endif

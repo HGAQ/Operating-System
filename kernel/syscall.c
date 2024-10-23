@@ -119,6 +119,7 @@ extern uint64 sys_rename(void);
 extern uint64 sys_brk(void);
 extern uint64 sys_write_(void);
 extern uint64 sys_exit_(void);
+extern uint64 sys_poweroff(void);
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -150,6 +151,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_brk]         sys_brk,
   [SYS_write_]      sys_write,
   [SYS_exit_]       sys_exit,
+  [SYS_poweroff]    sys_poweroff,
 };
 
 static char *sysnames[] = {
@@ -181,7 +183,8 @@ static char *sysnames[] = {
   [SYS_rename]      "rename",
   [SYS_brk]         "brk",
   [SYS_write_]      "write",
-  [SYS_write_]      "exit",
+  [SYS_exit_]       "exit",
+  [SYS_poweroff]    "poweroff",
 };
 
 void
@@ -233,3 +236,4 @@ sys_sysinfo(void)
 
   return 0;
 }
+

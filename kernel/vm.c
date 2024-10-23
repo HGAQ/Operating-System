@@ -27,6 +27,9 @@ kvminit()
 
   memset(kernel_pagetable, 0, PGSIZE);
 
+  // QEMU test interface used for power management
+  //kvmmap(QEMU_POWER, QEMU_POWER, PGSIZE, PTE_R | PTE_W);
+
   // uart registers
   kvmmap(UART_V, UART, PGSIZE, PTE_R | PTE_W);
   
@@ -161,7 +164,7 @@ walkaddr(pagetable_t pagetable, uint64 va)
 void
 kvmmap(uint64 va, uint64 pa, uint64 sz, int perm)
 {
-  if(mappages(kernel_pagetable, va, sz, pa, perm) != 0)
+  if(mappages(kernel_pagetable, va ,sz, pa, perm) != 0)
     panic("kvmmap");
 }
 

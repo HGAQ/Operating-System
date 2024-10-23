@@ -130,3 +130,8 @@ rename:
  li a7, SYS_rename
  ecall
  ret
+.global poweroff
+poweroff:
+ li a7, SYS_poweroff
+ ecall
+ ret

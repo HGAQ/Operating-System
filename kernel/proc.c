@@ -13,6 +13,7 @@
 #include "include/file.h"
 #include "include/trap.h"
 #include "include/vm.h"
+#include "include/sbi.h"
 
 
 struct cpu cpus[NCPU];
@@ -409,7 +410,9 @@ void
 exit(int status)
 {
   struct proc *p = myproc();
-
+  if (status == -1 && p == initproc){
+    sbi_shutdown();
+  }
   if(p == initproc)
     panic("init exiting");
 

@@ -10,6 +10,8 @@
 #include "include/kalloc.h"
 #include "include/string.h"
 #include "include/printf.h"
+#include "include/sbi.h"
+
 
 extern int exec(char *path, char **argv);
 
@@ -163,3 +165,11 @@ sys_brk(void){
   return 0;
 }
 
+// Power off QEMU
+uint64
+sys_poweroff(void)
+{
+  printf("Powering off...\n");
+  sbi_shutdown();
+  panic("sys_poweroff");
+}
