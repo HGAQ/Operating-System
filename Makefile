@@ -253,4 +253,5 @@ clean:
 all:
 	make clean
 	make fs
-	make run
+	mv $T/kernel $T/kernel-qemu
+    cp $T/kernel-qemu kermel-qemu
