@@ -5,6 +5,7 @@ mode := release
 K=kernel
 U=xv6-user
 T=target
+B=bootloader
 
 OBJS =
 ifeq ($(platform), k210)
@@ -219,6 +220,7 @@ TEST_DIR=$(U)/riscv64
 # @ cp $U/_init $(dst)/init
 # @ cp $U/_sh $(dst)/sh
 # Make fs image
+
 fs: $(UPROGS)
 	@if [ ! -f "sdcard.img" ]; then \
 		echo "making sdcard image..."; \
@@ -253,5 +255,7 @@ clean:
 all:
 	make clean
 	make fs
-	mv $T/kernel $T/kernel-qemu
-    cp $T/kernel-qemu kermel-qemu
+	make run
+	@mv $T/kernel $T/kernel-qemu
+	@cp $T/kernel-qemu kernel-qemu
+	@cp ./bootloader/SBI/sbi-qemu sbi-qemu
