@@ -6,4 +6,5 @@ kernel/proc.o: kernel/proc.c kernel/include/types.h \
  kernel/include/stat.h kernel/include/trap.h kernel/include/intr.h \
  kernel/include/kalloc.h kernel/include/printf.h kernel/include/string.h \
  kernel/include/fat32.h kernel/include/file.h kernel/include/trap.h \
- kernel/include/vm.h kernel/include/sbi.h kernel/include/initcode.h
+ kernel/include/vm.h kernel/include/sbi.h kernel/include/fcntl.h \
+ kernel/include/initcode.h

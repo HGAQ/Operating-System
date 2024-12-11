@@ -156,6 +156,12 @@ sys_trace(void)
   return 0;
 }
 
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+
+
 uint64
 sys_brk(void){
   uint64 curr_addr;
@@ -177,6 +183,32 @@ sys_brk(void){
   return 0;
 }
 
+
+uint64
+sys_clone(void){
+  uint64 flag, stack;
+	if (argaddr(0, &flag) < 0) 
+		return -1;
+	if (argaddr(1, &stack) < 0) 
+		return -1;
+  printf("Running: CLONE ... flag: %ld ... stack: %ld\n", flag, stack);
+  if (stack != 0)
+	  return clone(flag, stack);
+  else
+    return fork();
+}
+
+uint64
+sys_wait4(void)
+{
+  uint64 status;
+  int pid, options;
+  if(argaddr(1, &status) < 0 || argint(0, &pid) < 0 || argint(2, &options) < 0){
+    return -1;}
+  printf("Running: WAIT4 ... pid: %ld ... options: %ld\n", pid, options);
+  return waitpid(pid, status, options);
+}
+
 // Power off QEMU
 uint64
 sys_poweroff(void)
@@ -185,3 +217,6 @@ sys_poweroff(void)
   sbi_shutdown();
   panic("sys_poweroff");
 }
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+

@@ -140,3 +140,13 @@ mkdirat:
  li a7, SYS_mkdirat
  ecall
  ret
+.global clone
+clone:
+ li a7, SYS_clone
+ ecall
+ ret
+.global wait4
+wait4:
+ li a7, SYS_wait4
+ ecall
+ ret

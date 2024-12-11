@@ -35,4 +35,8 @@
 
 #define SYS_brk         214
 #define SYS_mkdirat     34
+#define SYS_chdir_      49
+#define SYS_clone       220
+#define SYS_wait4       260
+
 #endif

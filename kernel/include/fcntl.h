@@ -4,3 +4,10 @@
 #define O_APPEND  0x004
 #define O_TRUNC   0x400
 #define O_CREATE  0x40
+
+
+
+/* Bits in the third argument to `waitpid'.  */
+#define	WNOHANG		1	/* Don't block waiting.  */
+#define	WUNTRACED	2	/* Report status of stopped children.  */
+#define WCONTINUED	8	/* Report continued child.  */

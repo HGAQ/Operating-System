@@ -42,5 +42,8 @@ entry("trace");
 entry("sysinfo");
 entry("rename");
 entry("poweroff");
+################################
 entry("mkdirat");
+entry("clone");
+entry("wait4")
 

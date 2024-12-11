@@ -231,11 +231,12 @@ sys_chdir(void)
 {
   char path[FAT32_MAX_PATH];
   struct dirent *ep;
-  struct proc *p = myproc();
+  struct proc *curr_proc = myproc();
   
   if(argstr(0, path, FAT32_MAX_PATH) < 0 || (ep = ename(path)) == NULL){
     return -1;
   }
+  printf("Running: CHDIR ... path: %s\n",  path);
   elock(ep);
   if(!(ep->attribute & ATTR_DIRECTORY)){
     eunlock(ep);
@@ -243,8 +244,8 @@ sys_chdir(void)
     return -1;
   }
   eunlock(ep);
-  eput(p->cwd);
-  p->cwd = ep;
+  eput(curr_proc->cwd);
+  curr_proc->cwd = ep;
   return 0;
 }
 
@@ -509,7 +510,7 @@ sys_mkdirat(void)
   if (argint(0, &dirfd) < 0 || argstr(1, path, FAT32_MAX_PATH) < 0 || argint(2, &mode) < 0) {
     return -1;
   }
-  printf("Running: BRK ... dirfd: %d ... mode: 0x%x... path: %s\n", dirfd, mode, path);
+  printf("Running: MKDIR ... dirfd: %d ... mode: 0x%x... path: %s\n", dirfd, mode, path);
   ep = create(path, T_DIR, mode);
   eunlock(ep);
   eput(ep);

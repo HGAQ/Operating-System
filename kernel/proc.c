@@ -14,7 +14,7 @@
 #include "include/trap.h"
 #include "include/vm.h"
 #include "include/sbi.h"
-
+#include "include/fcntl.h"
 
 struct cpu cpus[NCPU];
 
@@ -795,3 +795,113 @@ procnum(void)
   return num;
 }
 
+/////////////////////////////////////
+
+
+int clone(uint64 flag, uint64 stack) {
+	int i, pid;
+  struct proc *parent;
+  struct proc *child = myproc();
+
+  // Allocate process.
+  if((parent = allocproc()) == NULL){
+    printf("?\n");
+    return -1;
+  }
+  
+  // Copy user memory from parent to child.
+  if(uvmcopy(child->pagetable, parent->pagetable, parent->kpagetable, child->sz) < 0){
+    printf("?\n");
+    freeproc(parent);
+    release(&parent->lock);
+    return -1;
+  }
+  parent->sz = child->sz;
+
+  parent->parent = child;
+
+  // copy tracing mask from parent.
+  parent->tmask = child->tmask;
+
+  // copy saved user registers.
+  *(parent->trapframe) = *(child->trapframe);
+
+  // Cause fork to return 0 in the child.
+  parent->trapframe->a0 = 0;
+  parent->trapframe->sp = stack;
+
+  // increment reference counts on open file descriptors.
+  for(i = 0; i < NOFILE; i++)
+    if(child->ofile[i])
+      parent->ofile[i] = filedup(child->ofile[i]);
+  parent->cwd = edup(child->cwd);
+
+  safestrcpy(parent->name, child->name, sizeof(child->name));
+
+  pid = parent->pid;
+
+  parent->state = RUNNABLE;
+
+  release(&parent->lock);
+
+  return pid;
+}
+
+int
+waitpid(int pid_to_wait, uint64 status, int options)
+{
+  struct proc *np;
+  int havekids, pid;
+  struct proc *p = myproc();
+  
+  // printf("[waitpid] pid_to_wait: %d\n", pid_to_wait);
+  acquire(&p->lock);
+
+  while(1){
+    havekids = 0;
+    for (np = proc; np < &proc[NPROC]; np++) {
+      if(np->parent == p){
+        if(pid_to_wait == -1) {}
+        else if(pid_to_wait > 0) {
+          if(np->pid != pid_to_wait)
+            continue;
+        }
+        else
+          return -1;
+        acquire(&np->lock);
+        havekids = 1;
+        if(np->state == ZOMBIE) {
+          pid = np->pid;
+          // printf("[waitpid] pid: %d, state: %d\n", pid, np->xstate);
+          if (status != 0 && copyout2(status + 1, (char *)&np->xstate, sizeof(np->xstate)) < 0){
+            release(&np->lock);
+            release(&p->lock);
+            return -1;
+          }
+          freeproc(np);
+          release(&np->lock);
+          release(&p->lock);
+          return pid;
+        }
+        release(&np->lock);
+      }
+    }
+
+    if (!havekids && options == WNOHANG){
+      release(&p->lock);
+      return 0;
+    }
+
+    if (!havekids || p->killed){
+      release(&p->lock);
+      return -1;
+    }
+
+    // Wait for a child to exit.
+    sleep(p, &p->lock); // DOC: wait-sleep
+  }
+}
+
+
+
+/////////////////////////////////////
