@@ -8,38 +8,39 @@
 
 char *argv[] = {0};
 char *tests[] = {
- "brk",
- "chdir",
- "clone",
- "close",
- "dup",
- "dup2",
- "execve",
- "exit",
- "fork",
- "fstat",
- "getcwd",
- "getdents",
- "getpid",
- "getppid",
- "gettimeofday",
- "mkdir_",
- "mmap",
- "mount",
- "munmap",
- "open",
- "openat",
- "pipe",
- "read",
- "sleep",
- "test_echo",
- "times",
- "umount",
- "uname",
- "unlink",
- "wait","write",
- "yield",
- "waitpid",
+ "brk",                 // 1/3
+ "chdir",               // 2/3
+ "clone",               ////////////////////////////////
+ "close",               //
+ "dup",                 //
+ "dup2",                //
+ "execve",              //
+ "exit",                //
+ "fork",                ///////////////////////////////////
+ "fstat",               //
+ "getcwd",              //
+ "getdents",            //
+ "getpid",              //
+ "getppid",             //
+ "gettimeofday",        //
+ "mkdir_",              //
+ "mmap",                //
+ "mount",               //
+ "munmap",              //
+ "open",                //
+ "openat",              //
+ "pipe",                //
+ "read",                //
+ "sleep",               //
+ "test_echo",           //
+ "times",               //
+ "umount",              //
+ "uname",               //
+ "unlink",              //
+ "wait",                //
+ "write",               //////////////////////////////////////
+ "yield",               //
+ "waitpid",             //
 };
 int counts = sizeof(tests) / sizeof((tests)[0]);
 int main(void) {
@@ -49,7 +50,7 @@ int main(void) {
   dup(0); // stderr
 
   for (int i = 0; i < counts; i++) {
-    printf("init: starting %s\n", tests[i]);
+    //printf("====================================starting %s\n", tests[i]);
     pid = fork();
     if (pid < 0) {
       printf("init: fork failed\n");
@@ -72,8 +73,8 @@ int main(void) {
       // the shell exited; restart it.
       break;
     } else if(wpid < 0){
-      printf("init: wait returned an error\n");
-      exit(1);
+      printf("init: wait returned\n");
+      exit(-1);
     } else {
       // it was a parentless process; do nothing.
     }

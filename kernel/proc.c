@@ -414,7 +414,7 @@ exit(int status)
     sbi_shutdown();
   }
   if(p == initproc)
-    panic("init exiting");
+    panic("initexiting");
 
   // Close all open files.
   for(int fd = 0; fd < NOFILE; fd++){

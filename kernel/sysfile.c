@@ -592,7 +592,24 @@ sys_openat(void)
 }
 
 
-
+uint64
+sys_dup3(void)
+{
+  struct file *f;
+  int newfd;
+  if(argfd(0, 0, &f) < 0) 
+    return -1;
+  if(argint(1, &newfd) < 0 || newfd < 0){
+    printf("EXIT!: DUP3 ... newfd: %d \n", newfd);
+    return -1;}
+  printf("Running: DUP3 ... newfd: %d \n", newfd);
+  if(myproc()->ofile[newfd] != f) 
+  {
+    myproc()->ofile[newfd] = f;
+    filedup(f);
+  }
+  return newfd;
+}
 
 
 ////////////////////////////////////////////////////////////////////////////

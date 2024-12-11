@@ -122,6 +122,8 @@ extern uint64 sys_mkdirat(void);
 extern uint64 sys_clone(void);
 extern uint64 sys_wait4(void);
 extern uint64 sys_openat(void);
+extern uint64 sys_dup3(void);
+extern uint64 sys_execve(void);
 /////////////////////
 extern uint64 sys_write_(void);
 extern uint64 sys_exit_(void);
@@ -160,7 +162,12 @@ static uint64 (*syscalls[])(void) = {
   [SYS_chdir_]      sys_chdir,
   [SYS_clone]       sys_clone,
   [SYS_wait4]       sys_wait4,
-  [SYS_openat]       sys_openat,
+  [SYS_openat]      sys_openat,
+  [SYS_close_]      sys_close,
+  [SYS_dup_]        sys_dup,
+  [SYS_dup3]        sys_dup3,
+  [SYS_getcwd_]     sys_getcwd,
+  [SYS_execve]      sys_execve,
   //////////////////////
   [SYS_write_]      sys_write,
   [SYS_exit_]       sys_exit,
@@ -201,6 +208,11 @@ static char *sysnames[] = {
   [SYS_clone]       "clone",
   [SYS_wait4]       "wait4",
   [SYS_openat]      "openat",
+  [SYS_close_]      "close",
+  [SYS_dup_]        "dup",
+  [SYS_dup3]        "dup3",
+  [SYS_getcwd_]     "getcwd",
+  [SYS_execve]      "execve",
   //////////////////////
   [SYS_write_]      "write",
   [SYS_exit_]       "exit",
