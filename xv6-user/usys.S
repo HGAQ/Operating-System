@@ -135,3 +135,8 @@ poweroff:
  li a7, SYS_poweroff
  ecall
  ret
+.global mkdirat
+mkdirat:
+ li a7, SYS_mkdirat
+ ecall
+ ret

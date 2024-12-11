@@ -116,7 +116,10 @@ extern uint64 sys_remove(void);
 extern uint64 sys_trace(void);
 extern uint64 sys_sysinfo(void);
 extern uint64 sys_rename(void);
+/////////////////
 extern uint64 sys_brk(void);
+extern uint64 sys_mkdirat(void);
+/////////////////////
 extern uint64 sys_write_(void);
 extern uint64 sys_exit_(void);
 extern uint64 sys_poweroff(void);
@@ -148,7 +151,10 @@ static uint64 (*syscalls[])(void) = {
   [SYS_trace]       sys_trace,
   [SYS_sysinfo]     sys_sysinfo,
   [SYS_rename]      sys_rename,
+  //////////////////////////
   [SYS_brk]         sys_brk,
+  [SYS_mkdirat]     sys_mkdirat,
+  //////////////////////
   [SYS_write_]      sys_write,
   [SYS_exit_]       sys_exit,
   [SYS_poweroff]    sys_poweroff,
@@ -181,7 +187,10 @@ static char *sysnames[] = {
   [SYS_trace]       "trace",
   [SYS_sysinfo]     "sysinfo",
   [SYS_rename]      "rename",
+  //////////////////////
   [SYS_brk]         "brk",
+  [SYS_mkdirat]     "mkdir",
+  //////////////////////
   [SYS_write_]      "write",
   [SYS_exit_]       "exit",
   [SYS_poweroff]    "poweroff",

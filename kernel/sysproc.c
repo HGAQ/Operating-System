@@ -12,7 +12,6 @@
 #include "include/printf.h"
 #include "include/sbi.h"
 
-
 extern int exec(char *path, char **argv);
 
 uint64
@@ -159,9 +158,22 @@ sys_trace(void)
 
 uint64
 sys_brk(void){
-  int n;
-  argint(0, &n);
-  printf("hello brk from proc %d, hart %d, arg %d\n", myproc()->pid, r_tp(), n);
+  uint64 curr_addr;
+  uint64 next_addr;
+  if(argaddr(0, &next_addr) < 0)
+    return -1;
+  curr_addr = myproc()->sz; // Size of process memory
+  printf("Running: BRK ... curr_addr: %d ... next_addr: %d\n", curr_addr, next_addr);
+  if (next_addr == 0)
+  {
+    return curr_addr;
+  }
+  if (next_addr >= curr_addr)
+  {
+    if(growproc(next_addr - curr_addr) < 0)
+      return -1;
+    else return myproc()->sz;
+  }
   return 0;
 }
 

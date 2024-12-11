@@ -494,3 +494,28 @@ fail:
     eput(src);
   return -1;
 }
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+
+uint64
+sys_mkdirat(void)
+{
+  char path[FAT32_MAX_PATH];
+  int dirfd, mode;
+  struct dirent *ep;
+  if (argint(0, &dirfd) < 0 || argstr(1, path, FAT32_MAX_PATH) < 0 || argint(2, &mode) < 0) {
+    return -1;
+  }
+  printf("Running: BRK ... dirfd: %d ... mode: 0x%x... path: %s\n", dirfd, mode, path);
+  ep = create(path, T_DIR, mode);
+  eunlock(ep);
+  eput(ep);
+  return 0;
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////

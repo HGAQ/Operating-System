@@ -28,8 +28,11 @@
 #define SYS_readdir     24
 #define SYS_getcwd      25
 #define SYS_rename      26
+
 #define SYS_poweroff    210
 #define SYS_write_      64
 #define SYS_exit_       93
+
 #define SYS_brk         214
+#define SYS_mkdirat     34
 #endif
