@@ -45,5 +45,6 @@ entry("poweroff");
 ################################
 entry("mkdirat");
 entry("clone");
-entry("wait4")
+entry("wait4");
+entry("openat");
 

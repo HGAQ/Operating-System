@@ -150,3 +150,8 @@ wait4:
  li a7, SYS_wait4
  ecall
  ret
+.global openat
+openat:
+ li a7, SYS_openat
+ ecall
+ ret

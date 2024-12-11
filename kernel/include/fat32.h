@@ -51,7 +51,7 @@ struct dirent {
 };
 
 int             fat32_init(void);
-struct dirent*  dirlookup(struct dirent *entry, char *filename, uint *poff);
+struct dirent*  dirlookup      (struct dirent *entry, char *filename, uint *poff);
 char*           formatname(char *name);
 void            emake(struct dirent *dp, struct dirent *ep, uint off);
 struct dirent*  ealloc(struct dirent *dp, char *name, int attr);
@@ -65,8 +65,10 @@ void            elock(struct dirent *entry);
 void            eunlock(struct dirent *entry);
 int             enext(struct dirent *dp, struct dirent *ep, uint off, int *count);
 struct dirent*  ename(char *path);
+struct dirent*  ename_env(struct dirent* env, char* path);
 struct dirent*  enameparent(char *path, char *name);
 int             eread(struct dirent *entry, int user_dst, uint64 dst, uint off, uint n);
 int             ewrite(struct dirent *entry, int user_src, uint64 src, uint off, uint n);
+
 
 #endif

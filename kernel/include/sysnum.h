@@ -38,5 +38,6 @@
 #define SYS_chdir_      49
 #define SYS_clone       220
 #define SYS_wait4       260
+#define SYS_openat      56
 
 #endif

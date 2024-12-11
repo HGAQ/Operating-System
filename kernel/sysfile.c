@@ -21,7 +21,6 @@
 #include "include/printf.h"
 #include "include/vm.h"
 
-
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
 static int
@@ -516,6 +515,84 @@ sys_mkdirat(void)
   eput(ep);
   return 0;
 }
+
+
+uint64
+sys_openat(void)
+{
+  char path[FAT32_MAX_PATH];
+  int curr_fd, fd, omode, mode, relative;
+  struct file *f;
+  struct file *curr_f;
+  struct dirent *ep;
+  struct dirent *dest_ep;
+
+  if(argint(0, &curr_fd) < 0 || argstr(1, path, FAT32_MAX_PATH) < 0 || argint(2, &omode) < 0 ||argint(3, &mode)<0)
+    return -1;
+  printf("Running: OPENAT ... filefd: %d ... mode: 0x%x ... omode: 0x%x... path: %s\n", curr_fd, mode, omode, path);
+  relative = 1;
+  if(path[0] != '/' && curr_fd != AT_FDCWD){/*绝对路径，忽略fd*/
+    relative = 0;
+    curr_f = myproc()->ofile[curr_fd];
+    if(curr_f == 0) return -1;
+    dest_ep = curr_f->ep;
+  }
+  else{
+    relative = 1;
+    dest_ep = 0;
+  }
+  /*open*/
+  if(omode & O_CREATE){
+    ep = create(path, T_FILE, omode);
+    if(ep == NULL){
+      return -1;
+    }
+  } 
+  else {
+    if(!relative){
+      if((ep = ename_env(dest_ep, path))== NULL){
+        return -1;
+      }
+    }
+    else{
+      if((ep = ename(path)) == NULL){
+        return -1;
+      }
+    }
+    elock(ep);
+    if((ep->attribute & ATTR_DIRECTORY) && omode != O_RDONLY){
+      eunlock(ep);
+      eput(ep);
+      return -1;
+    }
+  }
+
+  if((f = filealloc()) == NULL || (fd = fdalloc(f)) < 0){
+    if (f) {
+      fileclose(f);
+    }
+    eunlock(ep);
+    eput(ep);
+    return -1;
+  }
+
+  if(!(ep->attribute & ATTR_DIRECTORY) && (omode & O_TRUNC)){
+    etrunc(ep);
+  }
+
+  f->type = FD_ENTRY;
+  f->off = (omode & O_APPEND) ? ep->file_size : 0;
+  f->ep = ep;
+  f->readable = !(omode & O_WRONLY);
+  f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+
+  eunlock(ep);
+
+  return fd;
+}
+
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////
