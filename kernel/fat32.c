@@ -943,7 +943,7 @@ static struct dirent *lookup_path(char *path, int parent, char *name)
         if (!(entry->attribute & ATTR_DIRECTORY)) {
             eunlock(entry);
             eput(entry);
-            printf("ERROR:LOOKUP_PATH:    attribute\n");
+            //printf("ERROR:LOOKUP_PATH:    attribute\n");
             return NULL;
         }
         if (parent && *path == '\0') {
@@ -953,7 +953,7 @@ static struct dirent *lookup_path(char *path, int parent, char *name)
         if ((next = dirlookup(entry, name, 0)) == 0) {///////////???????????
             eunlock(entry);
             eput(entry);
-            printf("ERROR:LOOKUP_PATH:    next=0\n");
+            //printf("ERROR:LOOKUP_PATH:    next=0\n");
             return NULL;
         }
         eunlock(entry);
@@ -961,7 +961,7 @@ static struct dirent *lookup_path(char *path, int parent, char *name)
         entry = next;
     }
     if (parent) {
-        printf("ERROR:LOOKUP_PATH:    Parent\n");
+        //printf("ERROR:LOOKUP_PATH:    Parent\n");
         eput(entry);
         return NULL;
     }

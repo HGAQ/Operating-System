@@ -6,8 +6,8 @@ Disassembly of section .text:
 
 0000000000000000 <main>:
  "write",               //////////////////////////////////////
- "yield",               //
- "waitpid",             //
+ "yield",               //0/4
+ "waitpid",             //1/4
 };
 int counts = sizeof(tests) / sizeof((tests)[0]);
 int main(void) {

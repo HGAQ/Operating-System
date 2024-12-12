@@ -165,23 +165,20 @@ sys_trace(void)
 
 uint64
 sys_brk(void){
-  uint64 curr_addr;
-  uint64 next_addr;
-  if(argaddr(0, &next_addr) < 0)
+  uint64 new_addr, old_addr;
+  int n;
+
+  argaddr(0, &new_addr);
+  old_addr = myproc()->sz;
+
+  if(new_addr == 0)
+    return old_addr;
+
+  n = new_addr - old_addr;
+
+  if(growproc(n) < 0)
     return -1;
-  curr_addr = myproc()->sz; // Size of process memory
-  printf("Running: BRK ... curr_addr: %d ... next_addr: %d\n", curr_addr, next_addr);
-  if (next_addr == 0)
-  {
-    return curr_addr;
-  }
-  if (next_addr >= curr_addr)
-  {
-    if(growproc(next_addr - curr_addr) < 0)
-      return -1;
-    else return myproc()->sz;
-  }
-  return 0;
+  return new_addr;
 }
 
 
@@ -192,7 +189,7 @@ sys_clone(void){
 		return -1;
 	if (argaddr(1, &stack) < 0) 
 		return -1;
-  printf("Running: CLONE ... flag: %ld ... stack: %ld\n", flag, stack);
+  ///printf("Running: CLONE ... flag: %ld ... stack: %ld\n", flag, stack);
   if (stack != 0)
 	  return clone(flag, stack);
   else
@@ -206,7 +203,7 @@ sys_wait4(void)
   int pid, options;
   if(argaddr(1, &status) < 0 || argint(0, &pid) < 0 || argint(2, &options) < 0){
     return -1;}
-  printf("Running: WAIT4 ... pid: %ld ... options: %ld\n", pid, options);
+  //printf("Running: WAIT4 ... pid: %ld ... options: %ld\n", pid, options);
   return waitpid(pid, status, options);
 }
 
