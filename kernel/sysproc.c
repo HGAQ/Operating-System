@@ -11,6 +11,7 @@
 #include "include/string.h"
 #include "include/printf.h"
 #include "include/sbi.h"
+#include "include/vm.h"
 
 extern int exec(char *path, char **argv);
 
@@ -251,6 +252,26 @@ sys_execve(void)
   return -1;
 }
 
+uint64
+sys_getppid(void)
+{
+  return myproc()->parent->pid;
+}
+
+uint64
+sys_gettimeofday(void){
+  TimeVal tval;
+	uint64 tmp_ticks = r_time();
+	tval.sec = tmp_ticks / CLK_FREQ * 10;
+  uint64 ptval;
+  if (argaddr(0, &ptval) < 0) {
+		return -1;
+	}
+	if (ptval && copyout2(ptval, (char*)&tval, sizeof(tval)) < 0) {
+		return -1;
+	}
+	return 0;
+}
 
 
 // Power off QEMU

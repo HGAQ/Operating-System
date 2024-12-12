@@ -332,7 +332,7 @@ sys_readdir(void)
 uint64
 sys_getcwd(void)
 {
-  uint64 addr;
+ uint64 addr;
   if (argaddr(0, &addr) < 0)
     return -1;
 
@@ -356,13 +356,13 @@ sys_getcwd(void)
       de = de->parent;
     }
   }
-
+  if(addr==0){
+    return 0;
+  }
   // if (copyout(myproc()->pagetable, addr, s, strlen(s) + 1) < 0)
   if (copyout2(addr, s, strlen(s) + 1) < 0)
     return -1;
-  
-  return 0;
-
+  return addr;
 }
 
 // Is the directory dp empty except for "." and ".." ?
@@ -597,20 +597,31 @@ sys_dup3(void)
 {
   struct file *f;
   int newfd;
+  
   if(argfd(0, 0, &f) < 0) 
     return -1;
-  if(argint(1, &newfd) < 0 || newfd < 0){
-    printf("EXIT!: DUP3 ... newfd: %d \n", newfd);
-    return -1;}
-  printf("Running: DUP3 ... newfd: %d \n", newfd);
+  if(argint(1, &newfd) < 0 || newfd < 0)
+    return -1;
   if(myproc()->ofile[newfd] != f) 
   {
     myproc()->ofile[newfd] = f;
     filedup(f);
   }
+  printf("Running: DUP3 ... newfd: %d \n", newfd);
   return newfd;
 }
 
+uint64
+sys_getdents64(void){
+  struct file *f;
+  uint64 buf;
+  int len, fd;
+
+  if (argfd(0, &fd, &f) < 0 || argaddr(1, &buf) < 0 || argint(2, &len) < 0)
+    return -1;
+  printf("Running: OPENAT ... filefd: %d ... buf: 0x%x ... len: %d\n", fd, buf, len);
+  return dirnext_(f,buf,len);
+}
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////

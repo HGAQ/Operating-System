@@ -124,9 +124,10 @@ extern uint64 sys_wait4(void);
 extern uint64 sys_openat(void);
 extern uint64 sys_dup3(void);
 extern uint64 sys_execve(void);
+extern uint64 sys_getdents64(void);
+extern uint64 sys_getppid(void);
+extern uint64 sys_gettimeofday(void);
 /////////////////////
-extern uint64 sys_write_(void);
-extern uint64 sys_exit_(void);
 extern uint64 sys_poweroff(void);
 
 static uint64 (*syscalls[])(void) = {
@@ -168,6 +169,11 @@ static uint64 (*syscalls[])(void) = {
   [SYS_dup3]        sys_dup3,
   [SYS_getcwd_]     sys_getcwd,
   [SYS_execve]      sys_execve,
+  [SYS_fstat_]      sys_fstat,
+  [SYS_getdents64]  sys_getdents64,
+  [SYS_getpid_]     sys_getpid,
+  [SYS_getppid]     sys_getppid,
+  [SYS_gettimeofday]sys_gettimeofday,
   //////////////////////
   [SYS_write_]      sys_write,
   [SYS_exit_]       sys_exit,
@@ -201,6 +207,7 @@ static char *sysnames[] = {
   [SYS_trace]       "trace",
   [SYS_sysinfo]     "sysinfo",
   [SYS_rename]      "rename",
+  [SYS_gettimeofday]"gettimeofday",
   //////////////////////
   [SYS_brk]         "brk",
   [SYS_mkdirat]     "mkdir",
@@ -213,6 +220,10 @@ static char *sysnames[] = {
   [SYS_dup3]        "dup3",
   [SYS_getcwd_]     "getcwd",
   [SYS_execve]      "execve",
+  [SYS_fstat_]      "fstat",
+  [SYS_getdents64]  "getdents",
+  [SYS_getpid_]     "getpid",
+  [SYS_getppid]     "getppid",
   //////////////////////
   [SYS_write_]      "write",
   [SYS_exit_]       "exit",

@@ -45,5 +45,9 @@
 #define SYS_dup3        24
 #define SYS_getcwd_     17
 #define SYS_execve      221
-
+#define SYS_fstat_      80
+#define SYS_getdents64  61
+#define SYS_getpid_     172
+#define SYS_getppid     173
+#define SYS_gettimeofday 169
 #endif

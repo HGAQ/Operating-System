@@ -29,6 +29,7 @@ void            kvmfreeusr(pagetable_t kpt);
 void            kvmfree(pagetable_t kpagetable, int stack_free);
 uint64          kwalkaddr(pagetable_t pagetable, uint64 va);
 int             copyout2(uint64 dstva, char *src, uint64 len);
+int             copyout3(char* dst, char *src, uint64 len);
 int             copyin2(char *dst, uint64 srcva, uint64 len);
 int             copyinstr2(char *dst, uint64 srcva, uint64 max);
 void            vmprint(pagetable_t pagetable);

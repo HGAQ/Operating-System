@@ -23,6 +23,15 @@
 #define FAT32_MAX_PATH      260
 #define ENTRY_CACHE_NUM     50
 
+struct __dirent__ {
+    uint64 d_ino;	// 索引结点号
+    long int d_off;	// 到下一个dirent的偏移
+    unsigned short d_reclen;	// 当前dirent的长度
+    unsigned char d_type;	// 文件类型
+    char d_name[FAT32_MAX_FILENAME + 1];	//文件名
+};
+
+
 struct dirent {
     char  filename[FAT32_MAX_FILENAME + 1];
     uint8   attribute;

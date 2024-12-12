@@ -456,6 +456,17 @@ copyout2(uint64 dstva, char *src, uint64 len)
   return 0;
 }
 
+int
+copyout3(char* dst, char *src, uint64 len)
+{
+  uint64 sz = myproc()->sz;
+  if (2* len > sz || len >= sz) {
+    return -1;
+  }
+  memmove((void *)dst, src, len);
+  return 0;
+}
+
 // Copy from user to kernel.
 // Copy len bytes to dst from virtual address srcva in a given page table.
 // Return 0 on success, -1 on error.

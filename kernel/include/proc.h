@@ -66,6 +66,15 @@ struct proc {
   int tmask;                    // trace mask
 };
 
+typedef struct
+{
+    uint64 sec;  // 自 Unix 纪元起的秒数
+    uint64 usec; // 微秒数
+} TimeVal;
+
+
+
+
 void            reg_info(void);
 int             cpuid(void);
 void            exit(int);
