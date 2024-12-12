@@ -210,48 +210,75 @@ dirnext(struct file *f, uint64 addr)
 
 //////////////////////////////////////////////////
 
+//int dirnext_(struct file *f, uint64 buffer, int len){
+//  
+//  if(f->readable == 0 || !(f->ep->attribute & ATTR_DIRECTORY))
+//    return -1;
+//
+//  struct dirent de;
+//  struct __dirent__ de_;
+//  int count = 0;
+//  int ret_size = len;
+//  int ret;
+//  elock(f->ep);
+//  while(1){
+//    de_.d_off = f-> off;
+//    ret = enext(f->ep, &de, f->off, &count);
+//    f->off += count * 32;
+//    if(ret == 0) {
+//      continue;
+//    }
+//    if(ret == -1) {
+//      return 0;
+//    }
+//    copyout3(de_.d_name, de.filename, sizeof(de.filename));
+//    if(de.attribute & ATTR_DIRECTORY){
+//      de_.d_type = T_DIR;
+//    } else{
+//      de_.d_type = T_FILE;
+//    }
+//    de_.d_ino = 0;
+//    int size = sizeof(struct __dirent__) - sizeof(de_.d_name) + strlen(de_.d_name) + 1;
+//    size += (sizeof(uint64) - (size % sizeof(uint64))) % sizeof(uint64); // Align to 8.
+//    de_.d_reclen = size;
+//    if(de_.d_reclen > len){
+//      break;
+//    }
+//    if(copyout2(buffer, (char *)&de_, sizeof(de_.d_reclen)) < 0)
+//      return -1;
+//    buffer += de_.d_reclen;
+//    len -= de_.d_reclen;
+//  }
+//  eunlock(f->ep);
+//  f->off += count * 32;
+//  return ret_size - len;
+//}
+
 int dirnext_(struct file *f, uint64 buffer, int len){
-  
-  if(f->readable == 0 || !(f->ep->attribute & ATTR_DIRECTORY))
+  struct __dirent__ *buf = (struct __dirent__ *)buffer, de;
+
+  struct dirent *ep = f->ep, *d;
+  if (ep == NULL)
     return -1;
 
-  struct dirent de;
-  struct __dirent__ de_;
-  int count = 0;
-  int ret_size = len;
-  int ret;
-  elock(f->ep);
-  while(1){
-    de_.d_off = f-> off;
-    ret = enext(f->ep, &de, f->off, &count);
-    f->off += count * 32;
-    if(ret == 0) {
-      continue;
+  int i = 0, sum_s = 0;
+  for (d = eroot(); d->next; d = d->next)
+  {
+    if (d->parent == ep)
+    {
+      de.d_ino = (long)d->parent + d->off;
+      de.d_off = d - d->next;
+      de.d_reclen = sizeof(de);
+      de.d_type = f->type;
+      safestrcpy(de.d_name, d->filename, sizeof(d->filename));
+
+      if (sum_s + sizeof(de) > len)
+        return sum_s;
+      sum_s += sizeof(de);
+      buf[i++] = de;
     }
-    if(ret == -1) {
-      return 0;
-    }
-    copyout3(de_.d_name, de.filename, sizeof(de.filename));
-    if(de.attribute & ATTR_DIRECTORY){
-      de_.d_type = T_DIR;
-    } else{
-      de_.d_type = T_FILE;
-    }
-    de_.d_ino = 0;
-    int size = sizeof(struct __dirent__) - sizeof(de_.d_name) + strlen(de_.d_name) + 1;
-    size += (sizeof(uint64) - (size % sizeof(uint64))) % sizeof(uint64); // Align to 8.
-    de_.d_reclen = size;
-    if(de_.d_reclen > len){
-      break;
-    }
-    if(copyout2(buffer, (char *)&de_, sizeof(de_.d_reclen)) < 0)
-      return -1;
-    buffer += de_.d_reclen;
-    len -= de_.d_reclen;
   }
-  eunlock(f->ep);
-  f->off += count * 32;
-  return ret_size - len;
+  return 0;
 }
 /////////////////////////////////////////////////////
 

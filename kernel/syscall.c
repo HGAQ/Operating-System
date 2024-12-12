@@ -127,6 +127,12 @@ extern uint64 sys_execve(void);
 extern uint64 sys_getdents64(void);
 extern uint64 sys_getppid(void);
 extern uint64 sys_gettimeofday(void);
+extern uint64 sys_mmap(void);
+extern uint64 sys_munmap(void);
+extern uint64 sys_pipe2(void);
+extern uint64 sys_nanosleep(void);
+extern uint64 sys_times(void);
+extern uint64 sys_mount(void);
 /////////////////////
 extern uint64 sys_poweroff(void);
 
@@ -174,6 +180,13 @@ static uint64 (*syscalls[])(void) = {
   [SYS_getpid_]     sys_getpid,
   [SYS_getppid]     sys_getppid,
   [SYS_gettimeofday]sys_gettimeofday,
+  [SYS_mmap]        sys_mmap,
+  [SYS_munmap]      sys_munmap,
+  [SYS_read_]       sys_read,
+  [SYS_pipe2]       sys_pipe2,
+  [SYS_nanosleep]   sys_nanosleep,
+  [SYS_times]       sys_times,
+  [SYS_mount]       sys_mount,
   //////////////////////
   [SYS_write_]      sys_write,
   [SYS_exit_]       sys_exit,
@@ -208,6 +221,7 @@ static char *sysnames[] = {
   [SYS_sysinfo]     "sysinfo",
   [SYS_rename]      "rename",
   [SYS_gettimeofday]"gettimeofday",
+  [SYS_read]        "read",
   //////////////////////
   [SYS_brk]         "brk",
   [SYS_mkdirat]     "mkdir",
@@ -224,6 +238,12 @@ static char *sysnames[] = {
   [SYS_getdents64]  "getdents",
   [SYS_getpid_]     "getpid",
   [SYS_getppid]     "getppid",
+  [SYS_mmap]        "mmap",
+  [SYS_munmap]      "munmap",
+  [SYS_pipe2]       "pipe",
+  [SYS_nanosleep]   "nanosleep",
+  [SYS_times]       "times",
+  [SYS_mount]       "mount",
   //////////////////////
   [SYS_write_]      "write",
   [SYS_exit_]       "exit",

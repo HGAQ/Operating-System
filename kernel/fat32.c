@@ -12,6 +12,11 @@
 
 /* fields that start with "_" are something we don't use */
 
+static struct dirent root;
+
+struct mntfs devs[8];
+int idx = 0;
+
 typedef struct short_name_entry {
     char        name[CHAR_SHORT_NAME];
     uint8       attr;
@@ -930,6 +935,7 @@ static struct dirent *lookup_path(char *path, int parent, char *name)
     } else if (*path != '\0') {
         entry = edup(myproc()->cwd);
     } else {
+        printf("ERROR:LOOKUP_PATH:    NAME?\n");
         return NULL;
     }
     while ((path = skipelem(path, name)) != 0) {
@@ -937,15 +943,17 @@ static struct dirent *lookup_path(char *path, int parent, char *name)
         if (!(entry->attribute & ATTR_DIRECTORY)) {
             eunlock(entry);
             eput(entry);
+            printf("ERROR:LOOKUP_PATH:    attribute\n");
             return NULL;
         }
         if (parent && *path == '\0') {
             eunlock(entry);
             return entry;
         }
-        if ((next = dirlookup(entry, name, 0)) == 0) {
+        if ((next = dirlookup(entry, name, 0)) == 0) {///////////???????????
             eunlock(entry);
             eput(entry);
+            printf("ERROR:LOOKUP_PATH:    next=0\n");
             return NULL;
         }
         eunlock(entry);
@@ -953,6 +961,7 @@ static struct dirent *lookup_path(char *path, int parent, char *name)
         entry = next;
     }
     if (parent) {
+        printf("ERROR:LOOKUP_PATH:    Parent\n");
         eput(entry);
         return NULL;
     }
@@ -964,6 +973,7 @@ struct dirent *ename(char *path)
     char name[FAT32_MAX_FILENAME + 1];
     return lookup_path(path, 0, name);
 }
+
 struct dirent *ename_env(struct dirent* env,char* path)
 {
     char name[FAT32_MAX_FILENAME + 1];
@@ -973,4 +983,61 @@ struct dirent *ename_env(struct dirent* env,char* path)
 struct dirent *enameparent(char *path, char *name)
 {
     return lookup_path(path, 1, name);
+}
+
+struct dirent *enameparent_env(struct dirent* env, char* path, char* name)
+{
+    return abs_lookup_path(env, path, 1, name);
+}
+
+
+uint64 paddr(struct dirent *ep)
+{
+    uint32 lba = first_sec_of_clus(ep->first_clus);
+    uint32 byts_per_clus = fat.bpb.byts_per_sec * fat.bpb.sec_per_clus;
+    return lba * fat.bpb.byts_per_sec + ep->off % byts_per_clus;
+}
+struct dirent *eroot()
+{
+    return &root;
+}
+
+uint64 mount(struct dirent *dev, struct dirent *mnt){
+    int idx = 0;
+    while (devs[idx].vaild != 0){
+          idx++;
+          idx = idx % 8;
+      }
+    struct buf *b = bread(dev->dev, 0);
+    if (strncmp((char const *)(b->data + 82), "FAT32", 5))
+        panic("not FAT32 volume");
+    memmove(&devs[idx].bpb.byts_per_sec, b->data + 11, 2); // avoid misaligned load on k210
+    devs[idx].bpb.sec_per_clus = *(b->data + 13);
+    devs[idx].bpb.rsvd_sec_cnt = *(uint16 *)(b->data + 14);
+    devs[idx].bpb.fat_cnt = *(b->data + 16);
+    devs[idx].bpb.hidd_sec = *(uint32 *)(b->data + 28);
+    devs[idx].bpb.tot_sec = *(uint32 *)(b->data + 32);
+    devs[idx].bpb.fat_sz = *(uint32 *)(b->data + 36);
+    devs[idx].bpb.root_clus = *(uint32 *)(b->data + 44);
+    devs[idx].first_data_sec = fat.bpb.rsvd_sec_cnt + fat.bpb.fat_cnt * fat.bpb.fat_sz;
+    devs[idx].data_sec_cnt = fat.bpb.tot_sec - fat.first_data_sec;
+    devs[idx].data_clus_cnt = fat.data_sec_cnt / fat.bpb.sec_per_clus;
+    devs[idx].byts_per_clus = fat.bpb.sec_per_clus * fat.bpb.byts_per_sec;
+    brelse(b);
+    if (BSIZE != devs[idx].bpb.byts_per_sec)
+        panic("byts_per_sec != BSIZE");
+    initlock(&ecache.lock, "ecache");
+    memset(&devs[idx].root, 0, sizeof(devs[idx].root));
+    initsleeplock(&root.lock, "entry");
+    devs[idx].root.attribute = (ATTR_DIRECTORY | ATTR_SYSTEM);
+    devs[idx].root.first_clus = devs[idx].root.cur_clus = devs[idx].bpb.root_clus;
+    devs[idx].root.valid = 1;
+    devs[idx].root.prev = &devs[idx].root;
+    devs[idx].root.next = &devs[idx].root;
+    devs[idx].root.filename[0] = '/';
+    devs[idx].root.filename[1] = '\0';
+    devs[idx].mount_mode = 1;
+    mnt->mount_flag = 1;
+    mnt->dev = idx;
+    return 0;
 }

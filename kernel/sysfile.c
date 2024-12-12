@@ -20,6 +20,9 @@
 #include "include/string.h"
 #include "include/printf.h"
 #include "include/vm.h"
+#include "include/memlayout.h"
+#include "include/buf.h"
+
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
@@ -503,14 +506,18 @@ fail:
 uint64
 sys_mkdirat(void)
 {
-  char path[FAT32_MAX_PATH];
+
+  char path[MAXPATH];
   int dirfd, mode;
   struct dirent *ep;
-  if (argint(0, &dirfd) < 0 || argstr(1, path, FAT32_MAX_PATH) < 0 || argint(2, &mode) < 0) {
+
+  if (argint(0, &dirfd) < 0 || argstr(1, path, MAXPATH) < 0 || argint(2, &mode) < 0) {
     return -1;
   }
-  printf("Running: MKDIR ... dirfd: %d ... mode: 0x%x... path: %s\n", dirfd, mode, path);
+  
   ep = create(path, T_DIR, mode);
+  printf("Running: MKDIRAT ... dirfd: %d ... mode: 0x%x... path: %s\n", dirfd, mode, path);
+
   eunlock(ep);
   eput(ep);
   return 0;
@@ -527,17 +534,21 @@ sys_openat(void)
   struct dirent *ep;
   struct dirent *dest_ep;
 
-  if(argint(0, &curr_fd) < 0 || argstr(1, path, FAT32_MAX_PATH) < 0 || argint(2, &omode) < 0 ||argint(3, &mode)<0)
+  if(argint(0, &curr_fd) < 0 || argstr(1, path, FAT32_MAX_PATH) < 0 || argint(2, &omode) < 0 ||argint(3, &mode)<0){
+    printf("ERROR!!: OPENAT ... filefd: %d ... mode: 0x%x ... omode: 0x%x... path: %s", curr_fd, mode, omode, path);
     return -1;
-  printf("Running: OPENAT ... filefd: %d ... mode: 0x%x ... omode: 0x%x... path: %s\n", curr_fd, mode, omode, path);
+  }
+  printf("Running: OPENAT ... filefd: %d ... mode: 0x%x ... omode: 0x%x... path: %s", curr_fd, mode, omode, path);
   relative = 1;
   if(path[0] != '/' && curr_fd != AT_FDCWD){/*绝对路径，忽略fd*/
+    printf("...isabsolute\n");
     relative = 0;
     curr_f = myproc()->ofile[curr_fd];
     if(curr_f == 0) return -1;
     dest_ep = curr_f->ep;
   }
   else{
+    printf("...isrelative\n");
     relative = 1;
     dest_ep = 0;
   }
@@ -549,18 +560,21 @@ sys_openat(void)
     }
   } 
   else {
-    if(!relative){
+    if(!relative){/*absolute*/
       if((ep = ename_env(dest_ep, path))== NULL){
+        printf("ERROR_ename_env!!!!\n");
         return -1;
       }
     }
     else{
       if((ep = ename(path)) == NULL){
-        return -1;
+          printf("ERROR_ename!!!!\n");
+          return -1;
       }
     }
     elock(ep);
-    if((ep->attribute & ATTR_DIRECTORY) && omode != O_RDONLY){
+    if((ep->attribute & ATTR_DIRECTORY) && (omode != O_RDONLY && omode != O_DIRECTORY)){
+      printf("ERROR_attribute = 0x%x & ATTR_DIRECTORY", ep->attribute);
       eunlock(ep);
       eput(ep);
       return -1;
@@ -579,15 +593,12 @@ sys_openat(void)
   if(!(ep->attribute & ATTR_DIRECTORY) && (omode & O_TRUNC)){
     etrunc(ep);
   }
-
   f->type = FD_ENTRY;
   f->off = (omode & O_APPEND) ? ep->file_size : 0;
   f->ep = ep;
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
-
   eunlock(ep);
-
   return fd;
 }
 
@@ -616,12 +627,129 @@ sys_getdents64(void){
   struct file *f;
   uint64 buf;
   int len, fd;
-
   if (argfd(0, &fd, &f) < 0 || argaddr(1, &buf) < 0 || argint(2, &len) < 0)
     return -1;
-  printf("Running: OPENAT ... filefd: %d ... buf: 0x%x ... len: %d\n", fd, buf, len);
+  printf("Running: getdent ... filefd: %d ... buf: 0x%x ... len: %d\n", fd, buf, len);
   return dirnext_(f,buf,len);
 }
 
+uint64
+sys_mmap(void){
+  return 0;
+  uint64 start, a, pa;
+  uint64 len, mapped_len = 0;
+  int prot;
+  int flags;
+  int fd;
+  int off;
+  struct file *f;
+
+  if (argaddr(0, &start) < 0 || argaddr(1, &len) < 0 || argint(2, &prot) < 0 ||
+      argint(3, &flags) < 0 || argfd(4, &fd, &f) < 0 || argint(5, &off) < 0)
+    return -1;
+
+  if (off % PGSIZE)
+    return -1;
+
+  struct dirent *ep = f->ep;
+  struct proc *p = myproc();
+
+  int perm = 0;
+  if (prot & PROT_READ) 
+    perm |= PTE_R;
+  if (prot & PROT_WRITE) 
+    perm |= PTE_W;
+  if (prot & PROT_EXEC) 
+    perm |= PTE_X;
+
+  a = start;
+  if (a == NULL)
+    a = 0x80000000;
+  pa = paddr(ep);
+  while (mapped_len < len)
+  {
+    if (a > MAXVA)
+      return -1;
+    if (vpte(p->pagetable, a) < 0)
+    {
+      a += PGSIZE;
+      continue;
+    }
+    if (mappages(p->pagetable, a, PGSIZE, pa, perm) < 0)
+      return -1;
+    if (mapped_len == 0)
+      start = a;
+    a += PGSIZE;
+    pa += PGSIZE;
+    mapped_len += PGSIZE;
+  }
+  return start;
+}
+
+
+uint64
+sys_munmap(void)
+{
+  return 0;
+  uint64 start;
+  uint64 len;
+  if (argaddr(0, &start) < 0 || argaddr(1, &len) < 0)
+    return -1;
+  struct proc *p = myproc();
+  vmunmap(p->pagetable, start, len, 0);
+  return 0;
+}
+
+
+uint64
+sys_pipe2(void)
+{
+  uint64 fdarray; // user pointer to array of two integers
+  int fd0 = -1, fd1;
+  struct proc *p = myproc();
+
+  if(argaddr(0, &fdarray) < 0)
+    return -1;
+
+  int *fd = (int *)fdarray;
+  struct file *rf = p->ofile[fd[0]], *wf = p->ofile[fd[1]];
+
+  if(pipealloc(&rf, &wf) < 0)
+    return -1;
+  fd0 = -1;
+  if((fd0 = fdalloc(rf)) < 0 || (fd1 = fdalloc(wf)) < 0){
+    if(fd0 >= 0)
+      p->ofile[fd0] = 0;
+    fileclose(rf);
+    fileclose(wf);
+    return -1;
+  }
+
+  fd[0] = fd0;
+  fd[1] = fd1;
+
+  return 0;
+}
+
+
+
+
+uint64
+sys_mount(void)
+{
+  char special[FAT32_MAX_PATH], dir[FAT32_MAX_PATH], fstype[FAT32_MAX_FILENAME];
+  uint64 flags, data;
+
+  if (argstr(0, special, FAT32_MAX_PATH) < 0 || argstr(1, dir, FAT32_MAX_PATH) < 0 || 
+      argstr(2, fstype, FAT32_MAX_FILENAME) < 0 || argaddr(3, &flags) < 0 || argaddr(4, &data) < 0)
+    return -1;
+  struct dirent *dev = NULL, *mnt;
+  if((mnt = ename(dir)) == NULL)
+    return -1;
+
+  if(strncmp("vfat", fstype, 5) != 0 && strncmp("fat32", fstype, 6) != 0)
+    return -1;
+  return mount(dev,mnt);
+}
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////

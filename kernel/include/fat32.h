@@ -57,7 +57,35 @@ struct dirent {
     struct dirent *next;
     struct dirent *prev;
     struct sleeplock    lock;
+    uint8 mount_flag;
 };
+
+
+struct mntfs
+{
+    uint32 first_data_sec;
+    uint32 data_sec_cnt;
+    uint32 data_clus_cnt;
+    uint32 byts_per_clus;
+
+    struct
+    {
+        uint16 byts_per_sec;
+        uint8 sec_per_clus;
+        uint16 rsvd_sec_cnt;
+        uint8 fat_cnt;   /* count of FAT regions */
+        uint32 hidd_sec; /* count of hidden sectors */
+        uint32 tot_sec;  /* total count of sectors including all regions */
+        uint32 fat_sz;   /* count of sectors for a FAT region */
+        uint32 root_clus;
+    } bpb;
+
+    int vaild;
+    struct dirent root;
+    uint8 mount_mode;
+};
+
+
 
 int             fat32_init(void);
 struct dirent*  dirlookup      (struct dirent *entry, char *filename, uint *poff);
@@ -79,6 +107,7 @@ struct dirent*  enameparent(char *path, char *name);
 struct dirent*  enameparent_env(struct dirent* env, char* path, char* name);
 int             eread(struct dirent *entry, int user_dst, uint64 dst, uint off, uint n);
 int             ewrite(struct dirent *entry, int user_src, uint64 src, uint off, uint n);
-
-
+uint64          paddr(struct dirent *ep);
+struct dirent * eroot();
+uint64          mount(struct dirent *dev, struct dirent *mnt);
 #endif

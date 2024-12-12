@@ -273,6 +273,50 @@ sys_gettimeofday(void){
 	return 0;
 }
 
+uint64
+sys_nanosleep(void){
+  int n;
+  uint64 req_, rem_, ticks0;
+  if (argaddr(0, &req_) < 0 || argaddr(1, &rem_) < 0)
+    return -1;
+
+	struct proc *p = myproc();
+  uint64 sec, usec;
+	if (copyin2((char*)&sec, req_, sizeof(sec)) < 0) 
+		return -1;
+	if (copyin2((char*)&usec, rem_, sizeof(usec)) < 0) 
+		return -1;
+	n = sec * 20 + usec / 50000000;
+
+  acquire(&p->lock);
+  ticks0 = ticks;
+  while(ticks - ticks0 < n){
+    if(myproc()->killed){
+      return -1;
+    }
+    sleep(&ticks, &p->lock);
+  }
+  release(&p->lock);
+  return 0;
+}
+
+
+uint64
+sys_times(void)
+{
+  uint64 tms;
+  argaddr(0, &tms);
+  struct proc *p = myproc();
+  if (tms) {
+    if(copyout2(tms, (char*)&p->proc_tms, sizeof(p->proc_tms)) == -1)
+      return -1;
+  }
+  else
+    return -1;
+  return r_time();
+}
+
+
 
 // Power off QEMU
 uint64

@@ -50,4 +50,11 @@
 #define SYS_getpid_     172
 #define SYS_getppid     173
 #define SYS_gettimeofday 169
+#define SYS_mmap        222
+#define SYS_munmap      215
+#define SYS_read_       63
+#define SYS_pipe2       59
+#define SYS_nanosleep   101
+#define SYS_times       153
+#define SYS_mount       40
 #endif

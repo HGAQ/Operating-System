@@ -662,3 +662,16 @@ void vmprint(pagetable_t pagetable)
   }
   return;
 }
+
+
+
+
+int vpte(pagetable_t pagetable, uint64 a)
+{
+  pte_t *pte;
+  if((pte = walk(pagetable, a, 1)) == NULL)
+    return -1;
+  if(*pte & PTE_V)
+    return -1;
+  return 0;
+}

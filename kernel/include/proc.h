@@ -40,7 +40,22 @@ struct cpu {
 extern struct cpu cpus[NCPU];
 
 enum procstate { UNUSED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+struct tms {
+	uint64 utime;		// user time 
+	uint64 stime;		// system time 
+	uint64 cutime;		// user time of children 
+	uint64 cstime;		// system time of children 
+};
 
+struct mmap_info{
+    int used;
+    uint64 start; //映射起始地址
+    uint64 len;
+    int prot;
+    int flags;
+    int fd;
+    uint64 offset;
+};
 // Per-process state
 struct proc {
   struct spinlock lock;
@@ -64,6 +79,11 @@ struct proc {
   struct dirent *cwd;          // Current directory
   char name[16];               // Process name (debugging)
   int tmask;                    // trace mask
+  struct mmap_info mmap_pool[MMAPNUM];
+  int unmapped_idx;
+  struct tms proc_tms;
+  uint64 user_timestamp;       // Time when proc entered user space
+  uint64 kernel_timestamp;     // Time when proc entered kernel space
 };
 
 typedef struct
@@ -71,8 +91,6 @@ typedef struct
     uint64 sec;  // 自 Unix 纪元起的秒数
     uint64 usec; // 微秒数
 } TimeVal;
-
-
 
 
 void            reg_info(void);

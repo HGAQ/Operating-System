@@ -592,10 +592,11 @@ sched(void)
     panic("sched running");
   if(intr_get())
     panic("sched interruptible");
-
+  p->proc_tms.stime += r_time() - p->kernel_timestamp; // Proc stopped
   intena = mycpu()->intena;
   swtch(&p->context, &mycpu()->context);
   mycpu()->intena = intena;
+  p->kernel_timestamp = r_time(); // Proc continued
 }
 
 // Give up the CPU for one scheduling round.

@@ -33,5 +33,6 @@ int             copyout3(char* dst, char *src, uint64 len);
 int             copyin2(char *dst, uint64 srcva, uint64 len);
 int             copyinstr2(char *dst, uint64 srcva, uint64 max);
 void            vmprint(pagetable_t pagetable);
-
+pte_t *         walk(pagetable_t pagetable, uint64 va, int alloc);
+int             vpte(pagetable_t pagetable, uint64 a);
 #endif 
