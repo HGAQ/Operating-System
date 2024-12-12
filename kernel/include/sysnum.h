@@ -57,4 +57,8 @@
 #define SYS_nanosleep   101
 #define SYS_times       153
 #define SYS_mount       40
+#define SYS_umount2     39
+#define SYS_uname       160
+#define SYS_unlinkat    35
+#define SYS_sched_yield 124
 #endif

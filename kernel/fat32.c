@@ -1041,3 +1041,11 @@ uint64 mount(struct dirent *dev, struct dirent *mnt){
     mnt->dev = idx;
     return 0;
 }
+int umount2(struct dirent *mnt)
+{
+    mnt->mount_flag = 0;
+    memset(&devs[mnt->dev], 0, sizeof(devs[mnt->dev]));
+    mnt->dev = 0;
+    return 0;
+}
+

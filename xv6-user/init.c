@@ -23,24 +23,24 @@ char *tests[] = {
  "getpid",              ////////////////////////////////////
  "getppid",             ///////////////////////////////////
  "gettimeofday",        //2/3
- "mkdir_",              //
- "mmap",                //
- "mount",               //
- "munmap",              //
- "open",                //
- "openat",              //
- "pipe",                //
- "read",                //
- "sleep",               //
+ "mkdir_",              //1/3
+ "mmap",                //1/3
+ "mount",               //4/5
+ "munmap",              //1/4
+ "open",                //1/3
+ "openat",              //1/4
+ "pipe",                //3/4
+ "read",                //1/3
+ "sleep",               ////////////////////////////////////////
  "test_echo",           //
- "times",               //
+ "times",               /////////////////////////////////////////
  "umount",              //
  "uname",               //
  "unlink",              //
- "wait",                //
+ "wait",                //1/4
  "write",               //////////////////////////////////////
  "yield",               //
- "waitpid",             //
+ "waitpid",             //1/4
 };
 int counts = sizeof(tests) / sizeof((tests)[0]);
 int main(void) {

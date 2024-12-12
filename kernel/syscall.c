@@ -133,6 +133,10 @@ extern uint64 sys_pipe2(void);
 extern uint64 sys_nanosleep(void);
 extern uint64 sys_times(void);
 extern uint64 sys_mount(void);
+extern uint64 sys_umount2(void);
+extern uint64 sys_uname(void);
+extern uint64 sys_unlinkat(void);
+extern uint64 sys_sched_yield(void);
 /////////////////////
 extern uint64 sys_poweroff(void);
 
@@ -187,6 +191,10 @@ static uint64 (*syscalls[])(void) = {
   [SYS_nanosleep]   sys_nanosleep,
   [SYS_times]       sys_times,
   [SYS_mount]       sys_mount,
+  [SYS_umount2]     sys_umount2,
+  [SYS_uname]       sys_uname,
+  [SYS_unlinkat]       sys_unlinkat,
+  [SYS_sched_yield]   sys_sched_yield,
   //////////////////////
   [SYS_write_]      sys_write,
   [SYS_exit_]       sys_exit,
@@ -222,6 +230,9 @@ static char *sysnames[] = {
   [SYS_rename]      "rename",
   [SYS_gettimeofday]"gettimeofday",
   [SYS_read]        "read",
+  [SYS_uname]       "unname",
+  [SYS_unlinkat]    "unlinkat",
+  [SYS_sched_yield] "sched_yield",
   //////////////////////
   [SYS_brk]         "brk",
   [SYS_mkdirat]     "mkdir",

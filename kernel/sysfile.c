@@ -24,6 +24,14 @@
 #include "include/buf.h"
 
 
+const char SYSNAME[] = "none";
+const char NODENAME[] = "none";
+const char RELEASE[] = "none";
+const char VERSION[] = "none";
+const char MACHINE[] = "none";
+const char DOMAINNAME[] = "none";
+
+
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
 static int
@@ -750,6 +758,79 @@ sys_mount(void)
   if(strncmp("vfat", fstype, 5) != 0 && strncmp("fat32", fstype, 6) != 0)
     return -1;
   return mount(dev,mnt);
+}
+
+uint64
+sys_umount2(void)
+{
+  char mount_path[FAT32_MAX_PATH];
+  int flags;
+  struct dirent *mnt;
+
+  if (argstr(0, mount_path, FAT32_MAX_PATH) < 0 || argint(1, &flags) < 0)
+    return -1;
+
+  if ((mnt = ename(mount_path)) == NULL)
+    return -1;
+
+  return umount2(mnt);
+}
+
+uint64
+sys_uname(void)
+{
+  uint64 addr;
+  if(argaddr(0, &addr) < 0){
+    return -1;
+  }
+
+  struct utsname* uts = (struct utsname*)addr;
+
+  if (copyout2((uint64)uts->sysname, (void*)SYSNAME, sizeof(SYSNAME)) < 0) 
+    return -1;
+	if (copyout2((uint64)uts->nodename, (void*)NODENAME, sizeof(NODENAME)) < 0) 
+    return -1;
+	if (copyout2((uint64)uts->release, (void*)RELEASE, sizeof(RELEASE)) < 0)
+    return -1;
+	if (copyout2((uint64)uts->version, (void*)VERSION, sizeof(VERSION)) < 0) 
+		return -1;
+	if (copyout2((uint64)uts->machine, (void*)MACHINE, sizeof(MACHINE)) < 0) 
+		return -1;
+	if (copyout2((uint64)uts->domainname, (void*)DOMAINNAME, sizeof(DOMAINNAME)) < 0) 
+		return -1;
+
+  return 0;
+}
+
+uint64 sys_unlinkat(struct dirent *mnt)
+{
+    char path[MAXPATH];
+    int dirfd, flags;
+    struct dirent *ep;  
+    if (argint(0, &dirfd) < 0) 
+      return -1;
+    if (argstr(1, path, MAXPATH) < 0 || argint(2, &flags) < 0)
+      return -1;
+    if((ep = ename(path)) == NULL)
+      return -1;    
+    int isdir = ((ep->attribute & ATTR_DIRECTORY) ? T_DIR : T_FILE) == T_FILE ? 0 : 1;
+    if (isdir && flags != AT_REMOVEDIR) {
+      eput(ep);
+      return -1;
+    } else if (!isdir && flags == AT_REMOVEDIR) {
+      eput(ep);
+      return -1;
+    }
+    elock(ep);
+    if (isdir && isdirempty(ep) != 1) {
+      eunlock(ep);
+      eput(ep);
+      return -1;
+    }
+    eremove(ep); // dirty!  
+    eunlock(ep);
+    eput(ep);
+    return 0;
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////

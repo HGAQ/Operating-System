@@ -110,4 +110,5 @@ int             ewrite(struct dirent *entry, int user_src, uint64 src, uint off,
 uint64          paddr(struct dirent *ep);
 struct dirent * eroot();
 uint64          mount(struct dirent *dev, struct dirent *mnt);
+int             umount2(struct dirent *mnt);
 #endif

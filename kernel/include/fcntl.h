@@ -7,7 +7,7 @@
 #define O_DIRECTORY 0x0200000
 
 #define AT_FDCWD    -100 /*if relative*/
-
+#define AT_REMOVEDIR 0x200
 /* Bits in the third argument to `waitpid'.  */
 #define	WNOHANG		1	/* Don't block waiting.  */
 #define	WUNTRACED	2	/* Report status of stopped children.  */

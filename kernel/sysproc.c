@@ -316,6 +316,12 @@ sys_times(void)
   return r_time();
 }
 
+uint64
+sys_sched_yield(void)
+{
+  yield();
+  return 0;
+}
 
 
 // Power off QEMU
